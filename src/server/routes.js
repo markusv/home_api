@@ -8,7 +8,7 @@ const h = new HarmonyHubController();
 /* eslint no-invalid-this: "off"  */
 router
   .get('/', function* () {
-    this.body = 'Hello world';
+    this.body = 'Hello world from the smarthome server';
   })
   .get('/futurehome/turnOnHomeMode', function*() {
     f.turnOnHomeMode();

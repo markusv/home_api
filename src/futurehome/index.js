@@ -1,7 +1,7 @@
-import config from '../../config/futurehome';
+import config from '../config/futurehome';
 import simpleOauth from 'simple-oauth2';
 import https from 'https';
-import Passwords from '../../config/password';
+import Passwords from '../config/password';
 
 // Get the access token object.
 const tokenConfig = {

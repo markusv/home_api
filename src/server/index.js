@@ -1,3 +1,4 @@
+import 'regenerator-runtime/runtime';
 import Koa from 'koa';
 import Routes from './routes';
 import convert from 'koa-convert';

@@ -1,4 +1,4 @@
-import config from '../../config/harmony';
+import config from '../config/harmony';
 import http from 'http';
 import DeviceNames from '../constants/harmonyDeviceNames';
 import HarmonyCommands from '../constants/harmonyCommands';
