@@ -22,6 +22,14 @@ router
     h.turnOffEverything();
     f.turnOnSleepMode();
     this.body = { message: 'success' };
+  })
+  .get('/harmony/listenToMusic', function*() {
+    h.listenToMusic()
+    this.body = { message: 'success' };
+  })
+  .get('/harmony/appleTv', function*() {
+    h.watchAppleTv()
+    this.body = { message: 'success' };
   });
 export default router;
 

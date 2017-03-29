@@ -11,11 +11,15 @@ export default class HarmonyHub {
     this.sendCommand(DeviceNames.APPLE_TV_STUE, HarmonyCommands.POWER_OFF);
     this.sendCommand(DeviceNames.TV, HarmonyCommands.POWER_OFF);
     this.sendCommand(DeviceNames.PS4, HarmonyCommands.POWER_OFF);
-    this.sendCommand(DeviceNames.ALTIBOX, HarmonyCommands.POWER_TOGGLE);
+//    this.sendCommand(DeviceNames.ALTIBOX, HarmonyCommands.POWER_TOGGLE);
   }
 
-  turnOffActivity() {
-    this.sendActivityCommand(HarmonyActivities.POWER_OFF);
+  listenToMusic() {
+    this.sendActivityCommand(HarmonyActivities.LISTEN_TO_MUSIC);
+  }
+
+  watchAppleTv() {
+    this.sendActivityCommand(HarmonyActivities.APPLE_TV);
   }
 
   sendActivityCommand(command) {
