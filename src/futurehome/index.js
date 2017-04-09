@@ -15,6 +15,35 @@ export default class FutureHomeController {
     this.oauth = simpleOauth.create(config.credentials);
   }
 
+  getLivingroomTemperature() {
+    const p = new Promise((resolve, reject) => {
+      this.withToken().then(() => {
+        const options = {
+          host: `${config.apiBaseURL}`,
+          path: `${config.apiUrlPrefix}/sites/${config.mySiteId}/devices/${config.livingroomMotionSensorId}`,
+          method: 'GET',
+          headers: this.createHeaders(false)
+        };
+        https.get(options, (res) => {
+          let json = '';
+          res.on('data', (chunk) => { json += chunk; });
+          res.on('end', () => {
+            if (res.statusCode === 200) {
+              const data = JSON.parse(json);
+              resolve(data.temperature);
+            }
+            else {
+              reject(res.statusCode);
+            }
+          });
+        }).on('error', (err) => {
+          reject(err);
+        });
+      });
+    });
+    return p;
+  }
+
   turnOnSleepMode() {
     this.turnOnMode('sleep');
   }
@@ -27,9 +56,9 @@ export default class FutureHomeController {
     this.withToken().then(() => {
       const options = {
         host: `${config.apiBaseURL}`,
-        path: `/api/v2/sites/${config.mySiteId}`,
+        path: `${config.apiUrlPrefix}/sites/${config.mySiteId}`,
         method: 'PATCH',
-        headers: this.createHeaders()
+        headers: this.createHeaders(true)
       };
       const req = https.request(options);
       req.write(`mode=${mode}`);
@@ -37,11 +66,13 @@ export default class FutureHomeController {
     });
   }
 
-  createHeaders() {
-    return {
-      Authorization: `Bearer ${this.token.token.access_token}`,
-      'Content-Type': 'application/x-www-form-urlencoded'
+  createHeaders(form) {
+    const headers = {
+      Authorization: `Bearer ${this.token.token.access_token}`
     };
+    if (!form) { return headers; }
+    headers['Content-type'] = 'application/x-www-form-urlencoded';
+    return headers;
   }
 
   withToken() {
