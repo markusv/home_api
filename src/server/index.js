@@ -14,5 +14,3 @@ app.use(convert(cors()));
 app.use(convert(Routes.routes()));
 app.use(convert(Routes.allowedMethods()));
 app.listen(ports.http);
-
-

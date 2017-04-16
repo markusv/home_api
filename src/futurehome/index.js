@@ -2,6 +2,8 @@ import config from '../config/futurehome';
 import simpleOauth from 'simple-oauth2';
 import https from 'https';
 import Passwords from '../config/password';
+import { stateManager } from '../state/stateManager.js';
+import WebSocket from 'ws';
 
 // Get the access token object.
 const tokenConfig = {
@@ -13,6 +15,13 @@ export default class FutureHomeController {
 
   constructor() {
     this.oauth = simpleOauth.create(config.credentials);
+    this.processFutureHomeStreamMessage = this.processFutureHomeStreamMessage.bind(this);
+    this.processLivingroomMotionSensorStreamMessage = this.processLivingroomMotionSensorStreamMessage.bind(this);
+    this.withToken().then(() => {
+      this.subscribeToFutureHomeSiteStream();
+      this.subscribeToLivingroomMotionSensorStream();
+      this.loadSiteState();
+    });
   }
 
   getLivingroomTemperature() {
@@ -102,5 +111,63 @@ export default class FutureHomeController {
       this.token = newToken;
       resolve();
     });
+  }
+
+  loadSiteState() {
+    this.withToken().then(() => {
+      const options = {
+        host: `${config.apiBaseURL}`,
+        path: `${config.apiUrlPrefix}/sites/${config.mySiteId}`,
+        method: 'GET',
+        headers: this.createHeaders(false)
+      };
+      https.get(options, (res) => {
+        let json = '';
+        res.on('data', (chunk) => { json += chunk; });
+        res.on('end', () => {
+          if (res.statusCode !== 200) { return; }
+          this.processSiteStateResponse(JSON.parse(json));
+        });
+      });
+    });
+  }
+
+  processSiteStateResponse(response) {
+    stateManager.setSiteMode(response.mode);
+    stateManager.setLivingroomTemperature(response.temperature.inside);
+  }
+
+  createLivingroomMotionSensorStreamUrl() {
+    return `https://${config.apiBaseURL}${config.apiUrlPrefix}/sites/${config.mySiteId}/devices/` +
+    `${config.livingroomMotionSensorId}/stream?access_token=${this.token.token.access_token}`;
+  }
+
+  subscribeToLivingroomMotionSensorStream() {
+    const ws = new WebSocket(this.createLivingroomMotionSensorStreamUrl());
+    ws.on('message', this.processLivingroomMotionSensorStreamMessage);
+  }
+
+  processLivingroomMotionSensorStreamMessage(data) {
+    console.log('livingroom message', data);
+  }
+
+  createFutureHomeWsStreamUrl() {
+    return `https://${config.apiBaseURL}${config.apiUrlPrefix}/sites/${config.mySiteId}/stream?access_token=${this.token.token.access_token}`;
+  }
+
+  subscribeToFutureHomeSiteStream() {
+    const ws = new WebSocket(this.createFutureHomeWsStreamUrl());
+    ws.on('message', this.processFutureHomeStreamMessage);
+  }
+
+  processFutureHomeStreamMessage(data) {
+    if (!data) { return; }
+    const message = JSON.parse(data);
+    if (message.site) { this.processSiteMessage(message); }
+  }
+
+  processSiteMessage(message) {
+    const siteMessage = message.site;
+    stateManager.setSiteMode(siteMessage.mode);
   }
 }

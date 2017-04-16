@@ -17,7 +17,8 @@
     "koa-convert": "^1.2.0",
     "koa-cors": "^0.0.16",
     "koa-router": "^5.4.0",
-    "simple-oauth2": "^1.1.0"
+    "simple-oauth2": "^1.1.0",
+    "ws": "^2.2.3"
   },
   "devDependencies": {
     "babel-cli": "^6.24.0",
