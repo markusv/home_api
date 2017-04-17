@@ -18,7 +18,7 @@ class StateManager {
   createWsServer() {
     this.wss = new WebSocket.Server({ port: config.wsPort });
     this.wss.on('connection', () => {
-      console.log("new connection");
+      console.log('new connection');
     });
   }
 
