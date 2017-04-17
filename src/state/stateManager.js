@@ -55,6 +55,7 @@ class StateManager {
   }
 
   notifyClients(data) {
+    console.log('notifyCliens', this.wss.clients.length, JSON.stringify(data));
     this.wss.clients.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify(data));

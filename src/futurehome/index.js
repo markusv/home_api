@@ -145,10 +145,17 @@ export default class FutureHomeController {
   subscribeToLivingroomMotionSensorStream() {
     const ws = new WebSocket(this.createLivingroomMotionSensorStreamUrl());
     ws.on('message', this.processLivingroomMotionSensorStreamMessage);
+    ws.on('open', () => {
+      console.log('motiondetector stream connected');
+    });
+
+    ws.on('close', () => {
+      console.log('motiondetector stream disconnected');
+    });
   }
 
   processLivingroomMotionSensorStreamMessage(data) {
-    console.log('livingroom message', data);
+    console.log('livingroom stream message', data);
   }
 
   createFutureHomeWsStreamUrl() {
@@ -158,10 +165,18 @@ export default class FutureHomeController {
   subscribeToFutureHomeSiteStream() {
     const ws = new WebSocket(this.createFutureHomeWsStreamUrl());
     ws.on('message', this.processFutureHomeStreamMessage);
+    ws.on('open', () => {
+      console.log('site stream connected');
+    });
+
+    ws.on('close', () => {
+      console.log('site stream disconnected');
+    });
   }
 
   processFutureHomeStreamMessage(data) {
     if (!data) { return; }
+    console.log('processFutureHomeSiteStreamMessage', data);
     const message = JSON.parse(data);
     if (message.site) { this.processSiteMessage(message); }
   }
