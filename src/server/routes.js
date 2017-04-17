@@ -1,6 +1,7 @@
 const router = require('koa-router')();
 import FutureHomeController from '../futurehome/index';
 import HarmonyHubController from '../harmonyHub/index';
+import { stateManager } from '../state/stateManager.js';
 
 const f = new FutureHomeController();
 const h = new HarmonyHubController();
@@ -9,6 +10,12 @@ const h = new HarmonyHubController();
 router
   .get('/', function* () {
     this.body = 'Hello world from the smarthome server';
+  })
+  .get('/state', function*() {
+    this.body = {
+      mode: stateManager.getSiteMode(),
+      temperature: stateManager.getLivingroomTemperature()
+    };
   })
   .get('/futurehome/turnOnHomeMode', function*() {
     f.turnOnHomeMode();

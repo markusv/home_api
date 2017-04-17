@@ -22,12 +22,20 @@ class StateManager {
     });
   }
 
+  getSiteMode() {
+    return dataModel.futurehome.mode;
+  }
+
   setSiteMode(mode) {
     const oldMode = dataModel.futurehome.mode;
     dataModel.futurehome.mode = mode;
     if (mode !== oldMode) {
       this.notifyClientsFHModeChange(mode);
     }
+  }
+
+  getLivingroomTemperature() {
+    return dataModel.futurehome.temperature.livingroom;
   }
 
   setLivingroomTemperature(temp) {
