@@ -4,6 +4,7 @@ import https from 'https';
 import Passwords from '../config/password';
 import { stateManager } from '../state/stateManager.js';
 import WebSocket from 'ws';
+import Constants from '../constants/index.js';
 
 // Get the access token object.
 const tokenConfig = {
@@ -145,13 +146,16 @@ export default class FutureHomeController {
   subscribeToLivingroomMotionSensorStream() {
     const ws = new WebSocket(this.createLivingroomMotionSensorStreamUrl());
     ws.on('message', this.processLivingroomMotionSensorStreamMessage);
+    let start = 0;
     ws.on('open', () => {
+      start = (new Date()).getTime();
       console.log('motiondetector stream connected');
     });
 
-    ws.on('close', () => {
-      console.log('motiondetector stream disconnected');
+    ws.on('close', (code, reason) => {
+      console.log('motiondetector stream disconnected', ((new Date()).getTime() - start ), code, reason);
     });
+    this.startWSPingInterval(ws);
   }
 
   processLivingroomMotionSensorStreamMessage(data) {
@@ -165,13 +169,16 @@ export default class FutureHomeController {
   subscribeToFutureHomeSiteStream() {
     const ws = new WebSocket(this.createFutureHomeWsStreamUrl());
     ws.on('message', this.processFutureHomeStreamMessage);
+    let start = 0;
     ws.on('open', () => {
+      start = (new Date()).getTime();
       console.log('site stream connected');
     });
 
-    ws.on('close', () => {
-      console.log('site stream disconnected');
+    ws.on('close', (code, reason) => {
+      console.log('site stream disconnected', ((new Date()).getTime() - start ), code, reason);
     });
+    this.startWSPingInterval(ws);
   }
 
   processFutureHomeStreamMessage(data) {
@@ -184,5 +191,11 @@ export default class FutureHomeController {
   processSiteMessage(message) {
     const siteMessage = message.site;
     stateManager.setSiteMode(siteMessage.mode);
+  }
+
+  startWSPingInterval(ws) {
+    setInterval(() => {
+      ws.ping('a');
+    }, Constants.WS_PING_TIMER);
   }
 }

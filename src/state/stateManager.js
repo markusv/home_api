@@ -1,5 +1,6 @@
 import WebSocket from 'ws';
 import config from '../config/index.js';
+import Constants from '../constants/index.js';
 
 const dataModel = {
   futurehome: {
@@ -13,6 +14,7 @@ const dataModel = {
 class StateManager {
   constructor() {
     this.createWsServer();
+    this.pingClients();
   }
 
   createWsServer() {
@@ -55,12 +57,21 @@ class StateManager {
   }
 
   notifyClients(data) {
-    console.log('notifyCliens', this.wss.clients.length, JSON.stringify(data));
+    console.log('notifyCliens', JSON.stringify(data));
     this.wss.clients.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify(data));
       }
     });
+  }
+
+  pingClients() {
+    if (!this.wss) { return; }
+    setInterval(() => {
+      this.wss.clients.forEach((client) => {
+        client.ping('ping');
+      });
+    }, Constants.WS_PING_TIMER);
   }
 }
 
