@@ -186,6 +186,20 @@ export default class FutureHomeController {
     console.log('processFutureHomeSiteStreamMessage', data);
     const message = JSON.parse(data);
     if (message.site) { this.processSiteMessage(message); }
+    if (message.devices) { this.processDeviceMessage(message); }
+    if (message.rooms) { this.processRoomMessage(message); }
+  }
+
+  processRoomMessage(message) {
+    message.devices.forEach((device) => {
+      if (device.temperature) { stateManager.setLivingroomTemperature(device.temperature); }
+    });
+  }
+
+  processDeviceMessage(message) {
+    message.rooms.forEach((room) => {
+      if (room.current_temperature) { stateManager.setLivingroomTemperature(room.current_temperature); }
+    });
   }
 
   processSiteMessage(message) {
