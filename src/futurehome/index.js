@@ -191,14 +191,14 @@ export default class FutureHomeController {
   }
 
   processRoomMessage(message) {
-    message.devices.forEach((device) => {
-      if (device.temperature) { stateManager.setLivingroomTemperature(device.temperature); }
+    message.rooms.forEach((room) => {
+      if (room.current_temperature) { stateManager.setLivingroomTemperature(room.current_temperature); }
     });
   }
 
   processDeviceMessage(message) {
-    message.rooms.forEach((room) => {
-      if (room.current_temperature) { stateManager.setLivingroomTemperature(room.current_temperature); }
+    message.devices.forEach((device) => {
+      if (device.temperature) { stateManager.setLivingroomTemperature(device.temperature); }
     });
   }
 
