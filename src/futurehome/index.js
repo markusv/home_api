@@ -209,7 +209,7 @@ export default class FutureHomeController {
 
   startWSPingInterval(ws) {
     setInterval(() => {
-      ws.ping('a');
+      ws.ping('a', undefined, true); //eslint-disable-line no-undefined
     }, Constants.WS_PING_TIMER);
   }
 }
