@@ -145,16 +145,21 @@ export default class FutureHomeController {
   }
 
   subscribeToLivingroomMotionSensorStream() {
-    const ws = new WebSocket(this.createLivingroomMotionSensorStreamUrl());
-    ws.on('message', this.processLivingroomMotionSensorStreamMessage);
     let start = 0;
-    ws.on('open', () => {
-      start = (new Date()).getTime();
-      log('motiondetector stream connected');
-    });
-
-    ws.on('close', (code, reason) => {
-      log('motiondetector stream disconnected', ((new Date()).getTime() - start ), code, reason);
+    const ws = this.openWebsovket({
+      url: this.createLivingroomMotionSensorStreamUrl(),
+      onMessage: this.processLivingroomMotionSensorStreamMessage,
+      onOpen: () => {
+        start = (new Date()).getTime();
+        log('motiondetector stream connected');
+      },
+      onClose: (code, reason) => {
+        log('motiondetector stream disconnected', ((new Date()).getTime() - start ), code, reason);
+      },
+      onReconnect: (count) => {
+        log(`motiondetector stream reconnect counter: ${count}`);
+      },
+      counter: 0
     });
     this.startWSPingInterval(ws);
   }
@@ -168,18 +173,49 @@ export default class FutureHomeController {
   }
 
   subscribeToFutureHomeSiteStream() {
-    const ws = new WebSocket(this.createFutureHomeWsStreamUrl());
-    ws.on('message', this.processFutureHomeStreamMessage);
     let start = 0;
+    const ws = this.openWebsovket({
+      url: this.createFutureHomeWsStreamUrl(),
+      onMessage: this.processFutureHomeStreamMessage,
+      onOpen: () => {
+        start = (new Date()).getTime();
+        log('site stream connected');
+      },
+      onClose: (code, reason) => {
+        log('site stream disconnected', ((new Date()).getTime() - start ), code, reason);
+      },
+      onReconnect: (count) => {
+        log(`site stream reconnect counter: ${count}`);
+      },
+      counter: 0
+    });
+    this.startWSPingInterval(ws);
+  }
+
+  openWebsovket(config) {
+    //url, onMessage, onOpen, onClose, onReconnect, counter
+    if (config.counter === Constants.MAX_WS_RETRY_COUNT) { return null; } // stop trying after 10 errors
+
+    let retryCounter = config.counter;
+    const ws = new WebSocket(config.url);
+    ws.on('message', config.onMessage);
     ws.on('open', () => {
-      start = (new Date()).getTime();
-      log('site stream connected');
+      retryCounter = 0;
+      if (config.onOpen) { config.onOpen(); }
     });
 
     ws.on('close', (code, reason) => {
-      log('site stream disconnected', ((new Date()).getTime() - start ), code, reason);
+      if (retryCounter < Constants.MAX_WS_RETRY_COUNT) {
+        retryCounter++;
+        window.setTimeout(() => {
+          this.openWebsovket(config);
+        }, Constants.WS_RECONNECT_TIMEOUT);
+
+        if (config.onReconnect) { config.onReconnect(retryCounter); }
+      }
+      else if (config.onClose) { config.onClose(code, reason); }
     });
-    this.startWSPingInterval(ws);
+    return ws;
   }
 
   processFutureHomeStreamMessage(data) {
@@ -209,6 +245,7 @@ export default class FutureHomeController {
   }
 
   startWSPingInterval(ws) {
+    if (!ws) { return; }
     setInterval(() => {
       ws.ping('a', undefined, true); //eslint-disable-line no-undefined
     }, Constants.WS_PING_TIMER);
