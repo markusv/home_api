@@ -1,6 +1,7 @@
 import WebSocket from 'ws';
 import config from '../config/index.js';
 import Constants from '../constants/index.js';
+import { log } from '../server/logger';
 
 const dataModel = {
   futurehome: {
@@ -20,7 +21,7 @@ class StateManager {
   createWsServer() {
     this.wss = new WebSocket.Server({ port: config.wsPort });
     this.wss.on('connection', () => {
-      console.log('new connection');
+      log('new connection');
     });
   }
 
@@ -57,7 +58,7 @@ class StateManager {
   }
 
   notifyClients(data) {
-    console.log('notifyCliens', JSON.stringify(data));
+    log('notifyCliens', JSON.stringify(data));
     this.wss.clients.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify(data));
