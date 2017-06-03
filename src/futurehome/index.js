@@ -87,7 +87,7 @@ export default class FutureHomeController {
   }
 
   withToken() {
-    const p = new Promise((resolve) => {
+    return new Promise((resolve) => {
       if (this.token && !this.token.expired()) {
         resolve();
         return;
@@ -99,12 +99,10 @@ export default class FutureHomeController {
 
       this.oauth.ownerPassword.getToken(tokenConfig)
         .then((result) => {
-          const token = this.oauth.accessToken.create(result);
-          this.token = token;
+          this.token = this.oauth.accessToken.create(result);
           resolve();
         });
     });
-    return p;
   }
 
   refreshToken(resolve) {
@@ -207,7 +205,7 @@ export default class FutureHomeController {
     ws.on('close', (code, reason) => {
       if (retryCounter < Constants.MAX_WS_RETRY_COUNT) {
         retryCounter++;
-        window.setTimeout(() => {
+        setTimeout(() => {
           this.openWebsovket(config);
         }, Constants.WS_RECONNECT_TIMEOUT);
 
