@@ -144,7 +144,7 @@ export default class FutureHomeController {
 
   subscribeToLivingroomMotionSensorStream() {
     let start = 0;
-    const ws = this.openWebsovket({
+    this.openWebsocket({
       url: this.createLivingroomMotionSensorStreamUrl(),
       onMessage: this.processLivingroomMotionSensorStreamMessage,
       onOpen: () => {
@@ -159,7 +159,6 @@ export default class FutureHomeController {
       },
       counter: 0
     });
-    this.startWSPingInterval(ws);
   }
 
   processLivingroomMotionSensorStreamMessage(data) {
@@ -172,7 +171,7 @@ export default class FutureHomeController {
 
   subscribeToFutureHomeSiteStream() {
     let start = 0;
-    const ws = this.openWebsovket({
+    this.openWebsocket({
       url: this.createFutureHomeWsStreamUrl(),
       onMessage: this.processFutureHomeStreamMessage,
       onOpen: () => {
@@ -187,10 +186,9 @@ export default class FutureHomeController {
       },
       counter: 0
     });
-    this.startWSPingInterval(ws);
   }
 
-  openWebsovket(config) {
+  openWebsocket(config) {
     //url, onMessage, onOpen, onClose, onReconnect, counter
     if (config.counter === Constants.MAX_WS_RETRY_COUNT) { return null; } // stop trying after 10 errors
 
@@ -200,16 +198,19 @@ export default class FutureHomeController {
     ws.on('open', () => {
       retryCounter = 0;
       if (config.onOpen) { config.onOpen(); }
+      ws.isOpen = true;
+      this.startWSPingInterval(ws);
     });
 
     ws.on('close', (code, reason) => {
+      ws.isOpen = false;
+      log(`websocket closed: ${config.url}, code: ${code}, reason: ${reason}`);
       if (retryCounter < Constants.MAX_WS_RETRY_COUNT) {
         retryCounter++;
         setTimeout(() => {
-          this.openWebsovket(config);
+          this.openWebsocket(config);
+          if (config.onReconnect) { config.onReconnect(retryCounter); }
         }, Constants.WS_RECONNECT_TIMEOUT);
-
-        if (config.onReconnect) { config.onReconnect(retryCounter); }
       }
       else if (config.onClose) { config.onClose(code, reason); }
     });
@@ -244,8 +245,14 @@ export default class FutureHomeController {
 
   startWSPingInterval(ws) {
     if (!ws) { return; }
-    setInterval(() => {
-      ws.ping('a', undefined, true); //eslint-disable-line no-undefined
+    const id = setInterval(() => {
+      if (!ws.isOpen) { clearInterval(id); }
+      try {
+        ws.ping('a', undefined, true); //eslint-disable-line no-undefined
+      }
+      catch (e) {
+        log('ping failed', e);
+      }
     }, Constants.WS_PING_TIMER);
   }
 }
