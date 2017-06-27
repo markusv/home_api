@@ -193,14 +193,20 @@ export default class FutureHomeController {
     if (config.counter === Constants.MAX_WS_RETRY_COUNT) { return null; } // stop trying after 10 errors
 
     let retryCounter = config.counter;
+    log('open websocket to: ', config.url);
     const ws = new WebSocket(config.url);
     ws.on('message', config.onMessage);
-    ws.on('open', () => {
-      retryCounter = 0;
-      if (config.onOpen) { config.onOpen(); }
-      ws.isOpen = true;
-      this.startWSPingInterval(ws);
-    });
+    try {
+      ws.on('open', () => {
+        retryCounter = 0;
+        if (config.onOpen) { config.onOpen(); }
+        ws.isOpen = true;
+        this.startWSPingInterval(ws);
+      });
+    }
+    catch (e) {
+      log('open websocket failed', e);
+    }
 
     ws.on('close', (code, reason) => {
       ws.isOpen = false;
