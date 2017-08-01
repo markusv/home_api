@@ -217,6 +217,20 @@ export default class FutureHomeController {
         }
         else if (config.onClose) { config.onClose(code, reason); }
       });
+      ws.on('error', (e) => {
+        console.log('error', e);
+        switch (e.code){
+          case 'ECONNREFUSED':
+            setTimeout(() => {
+              this.openWebsocket(config);
+              if (config.onReconnect) { config.onReconnect(retryCounter); }
+            }, Constants.WS_RECONNECT_TIMEOUT);
+            break;
+          default:
+            console.log('error', e);
+            break;
+        }
+      });
     }
     catch (e) {
       log('open websocket failed', e);
