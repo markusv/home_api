@@ -192,14 +192,13 @@ export default class FutureHomeController {
     //url, onMessage, onOpen, onClose, onReconnect, counter
     if (config.counter === Constants.MAX_WS_RETRY_COUNT) { return null; } // stop trying after 10 errors
 
-    let retryCounter = config.counter;
     log('open websocket to: ', config.url);
     let ws = null;
     try {
       ws = new WebSocket(config.url);
       ws.on('message', config.onMessage);
       ws.on('open', () => {
-        retryCounter = 0;
+        config.counter = 0;
         if (config.onOpen) { config.onOpen(); }
         ws.isOpen = true;
         this.startWSPingInterval(ws);
@@ -208,28 +207,17 @@ export default class FutureHomeController {
       ws.on('close', (code, reason) => {
         ws.isOpen = false;
         log(`websocket closed: ${config.url}, code: ${code}, reason: ${reason}`);
-        if (retryCounter < Constants.MAX_WS_RETRY_COUNT) {
-          retryCounter++;
+        if (config.counter < Constants.MAX_WS_RETRY_COUNT) {
+          config.counter++;
           setTimeout(() => {
             this.openWebsocket(config);
-            if (config.onReconnect) { config.onReconnect(retryCounter); }
+            if (config.onReconnect) { config.onReconnect(config.counter); }
           }, Constants.WS_RECONNECT_TIMEOUT);
         }
         else if (config.onClose) { config.onClose(code, reason); }
       });
       ws.on('error', (e) => {
-        console.log('error', e);
-        switch (e.code){
-          case 'ECONNREFUSED':
-            setTimeout(() => {
-              this.openWebsocket(config);
-              if (config.onReconnect) { config.onReconnect(retryCounter); }
-            }, Constants.WS_RECONNECT_TIMEOUT);
-            break;
-          default:
-            console.log('error', e);
-            break;
-        }
+        console.log('onerror', e.code, e);
       });
     }
     catch (e) {
