@@ -21,7 +21,7 @@ export default class FutureHomeController {
     this.processLivingroomMotionSensorStreamMessage = this.processLivingroomMotionSensorStreamMessage.bind(this);
     this.withToken().then(() => {
       this.subscribeToFutureHomeSiteStream();
-      this.subscribeToLivingroomMotionSensorStream();
+//      this.subscribeToLivingroomMotionSensorStream();
       this.loadSiteState();
     });
   }
@@ -212,6 +212,7 @@ export default class FutureHomeController {
         log(`websocket closed: ${config.url}, code: ${code}, reason: ${reason}`);
         if (config.counter < Constants.MAX_WS_RETRY_COUNT) {
           config.counter++;
+          ws = null;
           setTimeout(() => {
             this.openWebsocket(config);
             if (config.onReconnect) {
