@@ -89,14 +89,17 @@ export default class FutureHomeController {
   withToken() {
     return new Promise((resolve) => {
       if (this.token && !this.token.expired()) {
+        log('withToken - token is still valid');
         resolve();
         return;
       }
       else if (this.token && this.token.expired()) {
+        log('withToken - refresh token');
         this.refreshToken(resolve);
         return;
       }
 
+      log('withToken - get token');
       this.oauth.ownerPassword.getToken(tokenConfig)
         .then((result) => {
           this.token = this.oauth.accessToken.create(result);
@@ -211,13 +214,17 @@ export default class FutureHomeController {
           config.counter++;
           setTimeout(() => {
             this.openWebsocket(config);
-            if (config.onReconnect) { config.onReconnect(config.counter); }
+            if (config.onReconnect) {
+              this.withToken().then(() => {
+                config.onReconnect(config.counter);
+              });
+            }
           }, Constants.WS_RECONNECT_TIMEOUT);
         }
         else if (config.onClose) { config.onClose(code, reason); }
       });
       ws.on('error', (e) => {
-        console.log('onerror', e.code, e);
+        log('onerror', e.code, e);
       });
     }
     catch (e) {
