@@ -220,7 +220,7 @@ export default class FutureHomeController {
                 config.onReconnect(config.counter);
               });
             }
-          }, Constants.WS_RECONNECT_TIMEOUT);
+          }, Constants.WS_RECONNECT_TIMEOUT * (config.counter + 1));
         }
         else if (config.onClose) { config.onClose(code, reason); }
       });
