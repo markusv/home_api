@@ -210,7 +210,7 @@ export default class FutureHomeController {
       ws.on('close', (code, reason) => {
         ws.isOpen = false;
         log(`websocket closed: ${config.url}, code: ${code}, reason: ${reason}`);
-        if (config.counter < Constants.MAX_WS_RETRY_COUNT) {
+        if (config.counter <= Constants.MAX_WS_RETRY_COUNT) {
           config.counter++;
           ws = null;
           setTimeout(() => {
