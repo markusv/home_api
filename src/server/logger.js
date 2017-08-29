@@ -2,7 +2,7 @@ import moment from 'moment';
 import Winston from 'winston';
 
 const formatter = (options) => {
-  const date = moment(new Date()).format('DD.MM.YYYY hh:mm:ss');
+  const date = moment(new Date()).format('DD.MM.YYYY HH:mm:ss');
   const message = options.message ? options.message : '';
   return `${date}: ${message}`;
 };
