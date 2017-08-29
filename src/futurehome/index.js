@@ -213,6 +213,8 @@ export default class FutureHomeController {
         if (config.counter <= Constants.MAX_WS_RETRY_COUNT) {
           config.counter++;
           ws = null;
+          const timeout = Constants.WS_RECONNECT_TIMEOUT * (config.counter + 1);
+          log(`wait for ${timeout}`);
           setTimeout(() => {
             this.openWebsocket(config);
             if (config.onReconnect) {
@@ -220,7 +222,7 @@ export default class FutureHomeController {
                 config.onReconnect(config.counter);
               });
             }
-          }, Constants.WS_RECONNECT_TIMEOUT * (config.counter + 1));
+          }, timeout);
         }
         else if (config.onClose) { config.onClose(code, reason); }
       });
