@@ -21,6 +21,10 @@ router
     f.turnOnHomeMode();
     this.body = { message: 'success' };
   })
+  .get('/futurehome/shortcut/littlys', function*() {
+    f.turnOnALittleLights();
+    this.body = { message: 'success' };
+  })
   .get('/futurehome/livingroomTemperature', function*() {
     const temperature = yield f.getLivingroomTemperature();
     this.body = { temperature };
@@ -50,6 +54,11 @@ router
   })
   .get('/harmony/appleTv', function*() {
     h.watchAppleTv();
+    this.body = { message: 'success' };
+  })
+  .get('/harmony/movie', function*() {
+    h.watchAppleTv();
+    f.turnOnMovieLights();
     this.body = { message: 'success' };
   });
 export default router;

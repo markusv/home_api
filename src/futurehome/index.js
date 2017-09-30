@@ -63,6 +63,14 @@ export default class FutureHomeController {
     this.turnOnMode('home');
   }
 
+  turnOnMovieLights() {
+    this.trigggerShortcut('1');
+  }
+
+  turnOnALittleLights() {
+    this.trigggerShortcut('3');
+  }
+
   turnOnMode(mode) {
     this.withToken().then(() => {
       const options = {
@@ -73,6 +81,20 @@ export default class FutureHomeController {
       };
       const req = https.request(options);
       req.write(`mode=${mode}`);
+      req.end();
+    });
+  }
+
+  trigggerShortcut(shortcut) {
+    this.withToken().then(() => {
+      const options = {
+        host: `${config.apiBaseURL}`,
+        path: `${config.apiUrlPrefix}/sites/${config.mySiteId}`,
+        method: 'PATCH',
+        headers: this.createHeaders(true)
+      };
+      const req = https.request(options);
+      req.write(`shortcut=${shortcut}`);
       req.end();
     });
   }
