@@ -238,12 +238,14 @@ export default class FutureHomeController {
           const timeout = Constants.WS_RECONNECT_TIMEOUT * (config.counter + 1);
           log(`wait for ${timeout}`);
           setTimeout(() => {
-            this.openWebsocket(config);
-            if (config.onReconnect) {
-              this.withToken().then(() => {
+            // trigger getting of new token, before reconnect, server restart token might not be valid
+            this.token = null;
+            this.withToken().then(() => {
+              this.openWebsocket(config);
+              if (config.onReconnect) {
                 config.onReconnect(config.counter);
-              });
-            }
+              }
+            });
           }, timeout);
         }
         else if (config.onClose) { config.onClose(code, reason); }
