@@ -20,7 +20,7 @@ export default class FutureHomeController {
     this.processFutureHomeStreamMessage = this.processFutureHomeStreamMessage.bind(this);
     this.processLivingroomMotionSensorStreamMessage = this.processLivingroomMotionSensorStreamMessage.bind(this);
     this.withToken().then(() => {
-      this.subscribeToFutureHomeSiteStream();
+//      this.subscribeToFutureHomeSiteStream();
 //      this.subscribeToLivingroomMotionSensorStream();
       this.loadSiteState();
     });
